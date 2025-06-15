@@ -4,3 +4,6 @@ model_list:
       model: openai/tts-1
       api_base: os.environ/OPENAI_TTS_BASE_URL # runs os.getenv("OPENAI_TTS_BASE_URL")
       api_key: os.environ/OPENAI_TTS_API_KEY # runs os.getenv("OPENAI_TTS_API_KEY")
+general_settings:
+  master_key: sk-123456
+  database_url: os.environ/DATABASE_URL
