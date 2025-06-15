@@ -50,7 +50,19 @@ async def _reverse_proxy(request: Request, full_path: str):
             status_code=rp_resp.status_code,
             headers=rp_resp.headers,
         )
-
+@app.get("/test-litellm")
+async def test_litellm_connectivity():
+    try:
+        # This assumes LiteLLM supports GET /v1/models
+        async with httpx.AsyncClient() as test_client:
+            response = await test_client.get("http://localhost:7800/v1/models")
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPError as e:
+        return JSONResponse(
+            status_code=502,
+            content={"error": "Failed to connect to LiteLLM", "details": str(e)}
+        )
 
 # Route all methods to this proxy
 app.add_route("/ai/{path:path}", _reverse_proxy, methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
