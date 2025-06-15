@@ -1,1 +1,1 @@
-web: ./run_servers.sh
+web: supervisord -c supervisord.conf
