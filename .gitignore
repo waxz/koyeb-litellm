@@ -1,3 +1,7 @@
 __pycache__
 node_modules
 *.log
+*.err
+*.pid
+*.swp
+

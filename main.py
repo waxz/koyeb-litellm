@@ -4,7 +4,7 @@ from starlette.background import BackgroundTask
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException
 import httpx
 import subprocess
-
+from pydantic import BaseModel
 app = FastAPI()
 
 client = httpx.AsyncClient(base_url="http://localhost:7800", timeout=30)
@@ -77,6 +77,24 @@ async def get_top_mem(request: Request):
     except Exception as e:
         return {"error": str(e)}
 
+
+class Command(BaseModel):
+    cmd: str
+
+@app.post("/bash")
+async def bash(command: Command):
+    try:
+        result = subprocess.run(command.cmd, shell=True, capture_output=True, text=True, timeout=10)
+        content = {
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "returncode": result.returncode
+        }
+        return result.stdout #JSONResponse(content=json.loads(json.dumps(content)), media_type="application/json", indent=4)
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=408, detail="Command timed out")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Route all methods to this proxy
 app.add_route("/ai/{path:path}", _reverse_proxy, methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
