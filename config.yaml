@@ -1,0 +1,6 @@
+model_list:
+  - model_name: tts-1
+    litellm_params:
+      model: openai/tts-1
+      api_base: os.environ/OPENAI_BASE_URL # runs os.getenv("OPENAI_BASE_URL")
+      api_key: os.environ/OPENAI_API_KEY # runs os.getenv("OPENAI_API_KEY")

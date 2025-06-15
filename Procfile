@@ -1,0 +1,1 @@
+web: litellm --config  ./config.yaml
