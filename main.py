@@ -3,6 +3,7 @@ from starlette.responses import StreamingResponse, JSONResponse, Response
 from starlette.background import BackgroundTask
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException
 import httpx
+import subprocess
 
 app = FastAPI()
 
@@ -51,7 +52,7 @@ async def _reverse_proxy(request: Request, full_path: str):
             headers=rp_resp.headers,
         )
 @app.get("/test-litellm")
-async def test_litellm_connectivity():
+async def test_litellm_connectivity(request: Request):
     try:
         # This assumes LiteLLM supports GET /v1/models
         async with httpx.AsyncClient() as test_client:
@@ -63,6 +64,19 @@ async def test_litellm_connectivity():
             status_code=502,
             content={"error": "Failed to connect to LiteLLM", "details": str(e)}
         )
+
+@app.get("/sys/top")
+async def get_top_mem(request: Request):
+    try:
+        # Run the command and capture output
+        result = subprocess.run(["top", "-b", "-n", "1", "-o", "%MEM"], capture_output=True, text=True)
+        if result.returncode == 0:
+            return {"output": "\n".join(result.stdout.splitlines()[:20])}
+        else:
+            return {"error": f"Command failed with code {result.returncode}", "stderr": result.stderr}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 # Route all methods to this proxy
 app.add_route("/ai/{path:path}", _reverse_proxy, methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
