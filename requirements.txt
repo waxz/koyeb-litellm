@@ -1,2 +1,5 @@
 litellm[proxy]==1.72.6
 prisma==0.15.0
+starlette==0.46.2
+httpx==0.28.1
+fastapi[standard]==0.115.12
